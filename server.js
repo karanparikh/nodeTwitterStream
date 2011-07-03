@@ -12,37 +12,55 @@ var TwitterClient = function() {
 
 util.inherits(TwitterClient, EventEmitter);
 
+t = new TwitterClient();
+
 var opts = {
 	host: 'api.twitter.com',
 	port: 80,
 	path: '/1/statuses/public_timeline.json'
 };
 
+function get_tweets(){
+	var req = http.get(opts, function(res) {
+		string = "";
+		res.setEncoding('utf8');
+		res.on('data', function(data){
+			string += data;
+		});
+		res.on('end', function() {
+			var req = http.get(opts, function(res) {
+				string = "";
+				res.setEncoding('utf8');
+				res.on('data', function(data){
+					string += data;
+				});
+				res.on('end', function() {
+					t.emit("tweets", string);
+				});
+			});	
+		});
+	});
+}
+
+
 http.createServer(function(request, response){
 	var uri = url.parse(request.url).pathname;
 	if(uri === "/stream"){
-		var req = http.get(opts, function(res) {
-			string = "";
-			res.setEncoding('utf8');
-			res.on('data', function(data){
-				string += data;
-			});
-			res.on('end', function() {
-				var req = http.get(opts, function(res) {
-					string = "";
-					res.setEncoding('utf8');
-					res.on('data', function(data){
-						string += data;
-					});
-					res.on('end', function() {
-						response.writeHead(200, {"Content-Type": "text/plain"});
-						response.end(string);
-					});
-				});
-			});
+		//Stream tweets to the client
+		get_tweets();
+		t.on("tweets", function(string){
+			response.writeHead(200, {"Content-Type": "text/plain"});
+			response.end(string);
+			clearTimeout(timeout);
 		});
+		var timeout = setTimeout(function(){
+			var blank_response = "";
+			response.writeHead(200, {"Content-Type": "text/plain"});
+			response.end(blank_response);
+		}, 10000);
 	}
 	else{
+		//serve the file to the client
 		var filename = path.join(process.cwd(), uri);
 		path.exists(filename, function(exists) {
 			if(!exists){
