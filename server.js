@@ -48,15 +48,17 @@ http.createServer(function(request, response){
 	if(uri === "/stream"){
 		//Stream tweets to the client
 		get_tweets();
-		t.on("tweets", function(string){
+		function tweet_listener(string){
 			response.writeHead(200, {"Content-Type": "text/plain"});
 			response.end(string);
 			clearTimeout(timeout);
-		});
+		}
+		t.on("tweets", tweet_listener);
 		var timeout = setTimeout(function(){
 			var blank_response = "";
 			response.writeHead(200, {"Content-Type": "text/plain"});
 			response.end(blank_response);
+			t.removeListener("tweets", tweet_listener);
 		}, 10000);
 	}
 	else{
