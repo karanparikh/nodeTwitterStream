@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-	</head>
-	<body>
-		<h1>Tweets!</h1>
-		<ul id="tweets">
-		</ul>
-	</body>
-	<script type="text/javascript">
-		function get_tweets(){
-			$.getJSON("/stream", function(tweets){
-				$.each(tweets, function(){
-					var tweet = this.text;
-					var tweet_string = "<li>" + tweet + "</li>";
-					$("#tweets").prepend(tweet_string);
-					$("#tweets li:first").fadeIn("slow");
-				});
-			});
-		}
-		setInterval("get_tweets()", 2000);
-	</script>
+    <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>Tweets!</h1>
+        <ul id="tweets">
+        </ul>
+    </body>
+    <script type="text/javascript">
+        function get_tweets(){
+            $.getJSON("/stream", function(tweets){
+                $.each(tweets, function(){
+                    var tweet = this.text;
+                    var tweet_string = "<li>" + tweet + "</li>";
+                    $("#tweets").prepend(tweet_string);
+                    $("#tweets li:first").fadeIn("slow");
+                });
+            });
+        }
+        setInterval("get_tweets()", 2000);
+    </script>
 </html>
