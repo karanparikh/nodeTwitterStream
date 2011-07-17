@@ -65,23 +65,27 @@ http.createServer(function(request, response){
         //serve the file to the client
         var filename = path.join(process.cwd(), uri);
         path.exists(filename, function(exists) {
-            if(!exists){
-                response.writeHead(404, {"Content-Type": "text/plain"});
-                response.end("404");
-            }
-            else{
-                fs.readFile(filename, "binary", function(err, file){
-                    if(err){
-                        response.writeHead(500, {"Content-Type": "text/plain"});
-                        response.write(err + "\n");
-                        response.end();
+            if(exists){
+                fs.stat(filename, function(err, stat) {
+                    var rs;
+                    if (err) {
+                        response.writeHead(500);
+                        response.end("Error reading the file.");
+                    }
+                    if (stat.isDirectory()){
+                        response.writeHead(403);
+                        response.end("Cannot display directories.");
                     }
                     else{
+                        rs = fs.createReadStream(filename);
                         response.writeHead(200);
-                        response.write(file, "binary");
-                        response.end();
+                        rs.pipe(response);
                     }
                 });
+            }
+            else{
+                response.writeHead(404, {"Content-Type": "text/plain"});
+                response.end("404: Not Found!");
             }
         });
     }
